@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BROWSER-DIRECT-FEED / DEMO</title>
+<style>
+  :root{color-scheme:dark}
+  *{box-sizing:border-box;margin:0}
+  body{background:#16181d;color:#e6e8ee;font:14px/1.6 "SF Mono",Menlo,Consolas,monospace;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+  .wrap{max-width:720px;width:100%}
+  h1{font-size:20px;letter-spacing:.08em;color:#22d3ee;margin-bottom:4px}
+  .sub{color:#8b93a7;font-size:12px;margin-bottom:22px}
+  .panel{border:1px solid #2a2f3a;border-radius:8px;background:#1b1e25;overflow:hidden}
+  .panel-bar{display:flex;gap:8px;align-items:center;padding:8px 12px;border-bottom:1px solid #2a2f3a;color:#8b93a7;font-size:11px}
+  .dot{width:9px;height:9px;border-radius:50%}
+  .r{background:#ff5f57}.y{background:#febc2e}.g{background:#28c840}
+  .feed{padding:14px 16px;white-space:nowrap;overflow:hidden}
+  .feed div{overflow:hidden;text-overflow:ellipsis;color:#c8cdd9;padding:2px 0}
+  .feed b{color:#22d3ee;font-weight:600}
+  .note{padding:10px 16px;border-top:1px dashed #2a2f3a;color:#8b93a7;font-size:11px}
+  button{margin-top:18px;background:#12242c;border:1px solid #22d3ee;color:#22d3ee;font:inherit;font-size:12px;padding:8px 14px;border-radius:6px;cursor:pointer}
+  button:hover{background:#173242}
+  .live{margin-top:10px;font-size:11px;min-height:16px}
+  .ok{color:#28c840}.bad{color:#ff5f57}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>BROWSER-DIRECT-FEED / DEMO</h1>
+  <div class="sub">synthetic payload inline &mdash; no fetches on load &mdash; live button is optional and fails soft</div>
+  <div class="panel">
+    <div class="panel-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>&nbsp;feed: items + djs (1-based object)</div>
+    <div class="feed" id="feed"></div>
+    <div class="note">Same shape the production marquee consumes: items[0] is the label, djs["1"] belongs to items[1]. Get this wrong and every row points one slot off.</div>
+  </div>
+  <button id="livebtn">try live fetch: thedjcalendar.com/top10.php</button>
+  <div class="live" id="live"></div>
+</div>
+<script>
+var SYNTH = {items:["The DJ Calendar top 10 DJ's worldwide","#1 DAVID GUETTA","#2 MARTIN GARRIX","#3 TI\u00cbSTO","#4 ARMIN VAN BUUREN","#5 CALVIN HARRIS"],
+  djs:{"1":{name:"David Guetta",url:"#",img:"",date:"Dec 31, 2026"},"2":{name:"Martin Garrix",url:"#",img:"",date:"Jan 9, 2027"},"3":{name:"Ti\u00ebsto",url:"#",img:"",date:"Jan 17, 2027"},"4":{name:"Armin van Buuren",url:"#",img:"",date:"Feb 2, 2027"},"5":{name:"Calvin Harris",url:"#",img:"",date:"Feb 14, 2027"}},ts:1};
+(function render(j){
+  var f=document.getElementById('feed');f.innerHTML='';
+  j.items.forEach(function(it,i){
+    var d=document.createElement('div');
+    var k=String(i);
+    if(j.djs[k]&&j.djs[k].name&&it.toUpperCase().indexOf(j.djs[k].name.toUpperCase())>-1){
+      d.innerHTML='<b>'+it+'</b> &mdash; next: '+j.djs[k].date;
+    }else{d.textContent=it;}
+    f.appendChild(d);
+  });
+})(SYNTH);
+document.getElementById('livebtn').addEventListener('click',function(){
+  var el=document.getElementById('live');el.textContent='fetching...';el.className='live';
+  fetch('https://thedjcalendar.com/top10.php',{cache:'no-cache'}).then(function(r){
+    if(!r.ok)throw 0;return r.json();
+  }).then(function(j){
+    if(!j||!j.items||!j.items.length)throw 0;
+    el.textContent='LIVE: got '+j.items.length+' items, '+Object.keys(j.djs).length+' djs (artists='+j.artists+', shows='+j.shows+')';
+    el.className='live ok';render(j);
+  }).catch(function(){el.textContent='live fetch unavailable (offline, blocked, or endpoint gone) - synthetic payload stays';el.className='live bad';});
+});
+</script>
+</body>
+</html>
