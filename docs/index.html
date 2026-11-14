@@ -40,7 +40,7 @@
 <script>
 var SYNTH = {items:["The DJ Calendar top 10 DJ's worldwide","#1 DAVID GUETTA","#2 MARTIN GARRIX","#3 TI\u00cbSTO","#4 ARMIN VAN BUUREN","#5 CALVIN HARRIS"],
   djs:{"1":{name:"David Guetta",url:"#",img:"",date:"Dec 31, 2026"},"2":{name:"Martin Garrix",url:"#",img:"",date:"Jan 9, 2027"},"3":{name:"Ti\u00ebsto",url:"#",img:"",date:"Jan 17, 2027"},"4":{name:"Armin van Buuren",url:"#",img:"",date:"Feb 2, 2027"},"5":{name:"Calvin Harris",url:"#",img:"",date:"Feb 14, 2027"}},ts:1};
-(function render(j){
+function render(j){
   var f=document.getElementById('feed');f.innerHTML='';
   j.items.forEach(function(it,i){
     var d=document.createElement('div');
@@ -50,7 +50,8 @@ var SYNTH = {items:["The DJ Calendar top 10 DJ's worldwide","#1 DAVID GUETTA","#
     }else{d.textContent=it;}
     f.appendChild(d);
   });
-})(SYNTH);
+}
+render(SYNTH);
 document.getElementById('livebtn').addEventListener('click',function(){
   var el=document.getElementById('live');el.textContent='fetching...';el.className='live';
   fetch('https://thedjcalendar.com/top10.php',{cache:'no-cache'}).then(function(r){
@@ -59,7 +60,7 @@ document.getElementById('livebtn').addEventListener('click',function(){
     if(!j||!j.items||!j.items.length)throw 0;
     el.textContent='LIVE: got '+j.items.length+' items, '+Object.keys(j.djs).length+' djs (artists='+j.artists+', shows='+j.shows+')';
     el.className='live ok';render(j);
-  }).catch(function(){el.textContent='live fetch unavailable (offline, blocked, or endpoint gone) - synthetic payload stays';el.className='live bad';});
+  }).catch(function(err){el.textContent='live fetch unavailable ('+(err&&err!==0?err:'offline, blocked, or endpoint gone')+') - synthetic payload stays';el.className='live bad';});
 });
 </script>
 </body>
